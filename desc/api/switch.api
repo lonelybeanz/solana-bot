@@ -1,0 +1,19 @@
+syntax = "v1"
+
+@server (
+	prefix: /api/v1
+	group:  version
+)
+service pumpBot {
+	@handler PumpBotHandler
+	get /pumpBot (PumpBotRequest) returns (PumpBotResponse)
+}
+
+type PumpBotRequest {
+	Switch string `form:"switch,optional,default=on"`
+}
+
+type PumpBotResponse {
+	message string `json:"message"`
+}
+

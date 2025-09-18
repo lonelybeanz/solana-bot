@@ -1,0 +1,14 @@
+default:
+  max_buy_amount: 0.123
+  min_buy_amount: 0.123
+  max_hold_millisecond: 30000
+  min_hold_millisecond: 15000
+  buy_slippage: 0.000002
+  sell_slippage: 10
+  delay_millisecond: 1
+  mint_start: false
+  smart_start: true
+
+hourly:
+  "7":
+    mint_start: true

@@ -1,0 +1,23 @@
+[Unit]
+Description=Pump Bot Application
+After=network.target
+StartLimitIntervalSec=60  # 放到 [Unit]
+StartLimitBurst=3
+
+[Service]
+ExecStart=/bin/bash /root/bot/control.sh restart
+WorkingDirectory=/root/bot
+PIDFile=/root/bot/app.pid
+
+Restart=always
+RestartSec=5  # 防止过快重启
+User=root
+Group=root
+
+StandardOutput=append:/dev/null
+StandardError=append:/root/bot/logs/error.log
+
+LimitNOFILE=65535  # 增加文件描述符限制
+
+[Install]
+WantedBy=multi-user.target
