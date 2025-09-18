@@ -1,39 +1,11 @@
 # solana-bot
 
-## Install Jzero Framework
+## Stream
 
-```shell
-go install github.com/jzero-io/jzero@latest
+流来源于BlockRazor；可以自建节点，或者购买dedicate Node，或者购买其他Grpc渠道的交易推送流；
+参考https://blockrazor.gitbook.io/blockrazor/solana/shred-stream
 
-jzero check
-```
+## Rpcs
 
-## Generate code
-
-### Generate server code
-
-```shell
-jzero gen
-```
-
-### Generate swagger code
-
-```shell
-jzero gen swagger
-```
-
-you can see generated swagger json in `desc/swagger`
-
-## Build docker image
-
-```shell
-# add a builder first
-docker buildx create --use --name=mybuilder --driver docker-container --driver-opt image=dockerpracticesig/buildkit:master
-
-# build and load
-docker buildx build --platform linux/arm64 --progress=plain -t solana-bot:latest . --load
-```
-
-## Documents
-
-https://jzero.jaronnie.com
+目前主流发单服务都可以配置
+<img width="1646" height="542" alt="image" src="https://github.com/user-attachments/assets/5e2d7b8a-2cc3-4244-88ac-270cef7c1509" />
