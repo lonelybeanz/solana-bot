@@ -20,9 +20,9 @@ import (
 
 var (
 	NonceAccount = []string{
-		"4XxYgdxdSu7a3evtGcU1H7nbwm7LFq8MNKwTfdiKHEr3",
-		"3Fx3o9PnUmPaa2VPbmozrFvyLPYymoLn14pkxhkJbfGx",
-		"HwZjTbTuBH9xpL7xFC5TRtHmfWbtnWo2n2CFSspjUJY7",
+		"DouUTgawHYhmxbU8UghapgBtvBWZmjg9NzBMxazAZKPh",
+		"HJuxZbBwuoDsvHTZ1c3Xqws56bLyGEdfqBtnXP9fVxgB",
+		"EDKVigjAcfMVxMXRCdpfzUQKgXYxb3MYv7g84MnXBjrU",
 	}
 	nonceMutex        = &sync.RWMutex{}
 	currentNonceIndex = 0

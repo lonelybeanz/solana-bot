@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"solana-bot/internal/config"
 	"solana-bot/internal/pb/feepb"
 	"solana-bot/internal/stream"
 
@@ -126,7 +127,7 @@ func BlockSubscribeWithRelay(conn *grpc.ClientConn) {
 func WSOLSubscribeWithRelay(conn *grpc.ClientConn) {
 
 	bal, _ := GetTokenBalance(
-		solana.MustPublicKeyFromBase58("8LVspLb436sBbhyPUFM3oMv6efFWHmfHbjpxNCzHzsgo"),
+		solana.MustPublicKeyFromBase58(config.C.Bot.Player),
 		solana.MustPublicKeyFromBase58("So11111111111111111111111111111111111111112"),
 	)
 	if bal == nil || bal.Uint64() == 0 {
@@ -137,7 +138,7 @@ func WSOLSubscribeWithRelay(conn *grpc.ClientConn) {
 		SolATA.Store(true)
 	}
 
-	balF := GetBalanceByPublic("8LVspLb436sBbhyPUFM3oMv6efFWHmfHbjpxNCzHzsgo")
+	balF := GetBalanceByPublic(config.C.Bot.Player)
 	logx.Infof("获取 SOL 余额成功: %v \n", balF)
 	if bal != nil {
 		balU, _ := balF.Uint64()
@@ -182,7 +183,7 @@ func WSOLSubscribeWithRelay(conn *grpc.ClientConn) {
 		}
 
 		go func() {
-			bal := GetBalanceByPublic("8LVspLb436sBbhyPUFM3oMv6efFWHmfHbjpxNCzHzsgo")
+			bal := GetBalanceByPublic(config.C.Bot.Player)
 			logx.Infof("获取 SOL 余额成功: %v \n", bal)
 			if bal != nil {
 				balU, _ := bal.Uint64()

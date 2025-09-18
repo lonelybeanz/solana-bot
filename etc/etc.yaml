@@ -16,3 +16,6 @@ log:
     ServiceName: explorer
     encoding: plain
     path: ./logs
+
+bot:
+    player: 123

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"solana-bot/internal/config"
 	"solana-bot/internal/dex/pump"
 	"solana-bot/internal/global"
 	"solana-bot/internal/stream"
@@ -293,7 +294,7 @@ func (t *TokenSwap) doTrade(swapInfo *solanaswapgo.SwapInfo) {
 
 	buyer := swapInfo.Signers[0].String()
 
-	if buyer == "8LVspLb436sBbhyPUFM3oMv6efFWHmfHbjpxNCzHzsgo" {
+	if buyer == config.C.Bot.Player {
 		if swapInfo.TokenInMint.String() == global.Solana {
 			t.readyToSell.Store(true)
 			fmt.Printf("[准备卖出] 我在 %s 买入 %d token\n", time.Now().Format(time.RFC822), swapInfo.TokenOutAmount)

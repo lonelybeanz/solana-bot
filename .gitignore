@@ -39,3 +39,6 @@ bin/
 pkg/solanaswap-go
 
 etc/.env
+.lingma
+.DS_Store
+etc/note.text
