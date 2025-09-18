@@ -10,5 +10,5 @@ default:
   smart_start: true
 
 hourly:
-  "7":
+  "12":
     mint_start: true

@@ -5,10 +5,12 @@ package cmd
 
 import (
 	"log"
+	"solana-bot/internal/config"
 	"solana-bot/internal/monitor"
 
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
+	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -46,6 +48,10 @@ func init() {
 func StartPumpMonitor(botCmd *cobra.Command) {
 
 	godotenv.Load()
+
+	var c config.Config
+	conf.MustLoad(cfgFile, &c)
+	config.C = c
 
 	// 获取命令行参数
 	mintEnable, _ := botCmd.Flags().GetBool("mint")

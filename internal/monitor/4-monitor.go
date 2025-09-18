@@ -66,20 +66,8 @@ func NewPumpFunMonitor() (*PumpFunMonitor, error) {
 		logx.Must(err)
 		return nil, err
 	}
-	grpcClient := stream.Grpc_connect(stream.GRPCUrl[0], true)
-	if grpcClient == nil {
-		return nil, err
-	}
 
 	global.ConnectToEndpoints()
-
-	//开启区块订阅
-	go global.BlockSubscribeWithRelay(grpcClient)
-	go global.NonceSubscribeWithRelay(grpcClient)
-	go global.WSOLSubscribeWithRelay(grpcClient)
-	go global.UpdateGasWithRelay()
-
-	ctx, cancel := context.WithCancel(context.Background())
 
 	BuyCache = fifomap.NewFIFOMap(5)
 
@@ -94,6 +82,16 @@ func NewPumpFunMonitor() (*PumpFunMonitor, error) {
 		// rpcs.NewTempgoralChannel(),
 	}
 
+	grpcClient := stream.Grpc_connect(stream.GRPCUrl[0], true)
+	if grpcClient == nil {
+		return nil, err
+	}
+	go global.BlockSubscribeWithRelay(grpcClient)
+	go global.NonceSubscribeWithRelay(grpcClient)
+	go global.WSOLSubscribeWithRelay(grpcClient)
+	go global.UpdateGasWithRelay()
+
+	ctx, cancel := context.WithCancel(context.Background())
 	return &PumpFunMonitor{
 			Wg:            &sync.WaitGroup{},
 			mu:            sync.Mutex{},

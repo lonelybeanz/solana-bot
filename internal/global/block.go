@@ -151,7 +151,7 @@ func WSOLSubscribeWithRelay(conn *grpc.ClientConn) {
 	subscription.Commitment = &commitment
 	subscription.Accounts = make(map[string]*pb.SubscribeRequestFilterAccounts)
 	subscription.Accounts["account_sub"] = &pb.SubscribeRequestFilterAccounts{}
-	subscription.Accounts["account_sub"].Account = []string{"7GYJkSBgbrSysKMjVP8AyfD52Pe2oVNtqs66g6ynWaWb"}
+	subscription.Accounts["account_sub"].Account = []string{"1"}
 	go stream.Grpc_subscribe(conn, &subscription, context.Background(), subscribe)
 
 	for msg := range subscribe {
