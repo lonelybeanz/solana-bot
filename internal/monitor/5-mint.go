@@ -62,7 +62,7 @@ func (p *PumpFunMonitor) ListenPumpAccountTransation() {
 		// 	return
 		// }
 
-		if global.Sol_Balance.Load() != 0 && global.Sol_Balance.Load() < 1e9 {
+		if global.Sol_Balance.Load() != 0 && global.Sol_Balance.Load() < 5e8 {
 			return
 		}
 

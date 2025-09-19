@@ -32,7 +32,7 @@ type RobotMonitor struct {
 }
 
 func NewRobotMonitor() (*RobotMonitor, error) {
-	grpcClient := stream.Grpc_connect(stream.GRPCUrl[0], true)
+	grpcClient := stream.Grpc_connect(stream.GRPCUrls[0], true)
 	if grpcClient == nil {
 		return nil, errors.New("无法连接到GRPC服务器")
 	}

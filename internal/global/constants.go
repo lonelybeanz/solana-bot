@@ -77,8 +77,6 @@ var (
 
 	// Update this
 	RPCs = []string{
-		"http://185.209.179.15:8899",
-		"http://64.130.32.137:8899",
 		// "https://mainnet.helius-rpc.com/?api-key=cae6aa3f-a766-4ad7-a0fd-d9ae935d414e",
 		// "https://solana-mainnet.api.syndica.io/api-key/4XiD1jQVGHU7BZCiEPijxX3VXHuvjcEgf9cynwLXZRoJQyBtSg7DNj9K64KLqseJnKx4UnJ4YdfzC4rHyoztzVnPyZaubR6xuFZ",
 		// "https://rpc.shyft.to?api_key=q2zpOxQjvr3rBG0v",
@@ -86,8 +84,6 @@ var (
 	}
 
 	WRPCs = []string{
-		"ws://185.209.179.15:8900",
-		"ws://64.130.32.137:8900",
 		// "wss://solana-mainnet.api.syndica.io/api-key/4XiD1jQVGHU7BZCiEPijxX3VXHuvjcEgf9cynwLXZRoJQyBtSg7DNj9K64KLqseJnKx4UnJ4YdfzC4rHyoztzVnPyZaubR6xuFZ",
 		// "wss://mainnet.helius-rpc.com/?api-key=cae6aa3f-a766-4ad7-a0fd-d9ae935d414e",
 		// "wss://rpc.shyft.to?api_key=q2zpOxQjvr3rBG0v",
@@ -130,7 +126,7 @@ var (
 
 // Load envrionment variables from .env
 func LoadEnvVariables() {
-	err := godotenv.Load("etc/.env")
+	err := godotenv.Load(".env")
 	if err != nil {
 		panic("Error loading .env file")
 	}

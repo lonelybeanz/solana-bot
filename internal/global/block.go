@@ -5,24 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"math/big"
-	"solana-bot/internal/config"
-	"solana-bot/internal/pb/feepb"
-	"solana-bot/internal/stream"
 
-	"solana-bot/internal/global/utils"
 	atomic_ "solana-bot/internal/global/utils/atomic"
 	"strings"
 	"sync"
 	"time"
 
-	pb "github.com/lonelybeanz/solanaswap-go/yellowstone-grpc"
-
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
 	"github.com/valyala/fasthttp"
-	"github.com/zeromicro/go-zero/core/logx"
-	"google.golang.org/grpc"
 )
 
 var (
@@ -62,138 +53,6 @@ type Clock struct {
 	UnixTimestamp       int64
 }
 
-func SlotSubscribeWithRelay(conn *grpc.ClientConn) {
-	subscribe := make(chan interface{})
-	var subscription pb.SubscribeRequest
-	commitment := pb.CommitmentLevel_PROCESSED
-	subscription.Commitment = &commitment
-	if subscription.Slots == nil {
-		subscription.Slots = make(map[string]*pb.SubscribeRequestFilterSlots)
-	}
-
-	subscription.Slots["slots"] = &pb.SubscribeRequestFilterSlots{}
-	go stream.Grpc_subscribe(conn, &subscription, context.Background(), subscribe)
-
-	for msg := range subscribe {
-		got := msg.(*pb.SubscribeUpdate)
-		//打印
-		// spew.Dump(got)
-
-		updateBlock := got.GetBlockMeta()
-
-		blockMutex.Lock()
-		block.BlockNum = updateBlock.Slot
-		block.Slot = updateBlock.Slot
-		block.LastTime = updateBlock.BlockTime.Timestamp
-		block.Time = updateBlock.GetBlockTime().Timestamp
-		block.PrevBlockHash = solana.MustHashFromBase58(updateBlock.GetBlockhash())
-		currentBlock.Store(updateBlock.Slot)
-		blockMutex.Unlock()
-
-	}
-}
-
-func BlockSubscribeWithRelay(conn *grpc.ClientConn) {
-	subscribe := make(chan interface{})
-	var subscription pb.SubscribeRequest
-	commitment := pb.CommitmentLevel_PROCESSED
-	subscription.Commitment = &commitment
-	if subscription.BlocksMeta == nil {
-		subscription.BlocksMeta = make(map[string]*pb.SubscribeRequestFilterBlocksMeta)
-	}
-	subscription.BlocksMeta["block_meta"] = &pb.SubscribeRequestFilterBlocksMeta{}
-	go stream.Grpc_subscribe(conn, &subscription, context.Background(), subscribe)
-
-	for msg := range subscribe {
-		got := msg.(*pb.SubscribeUpdate)
-		// spew.Dump(got)
-		updateBlock := got.GetBlockMeta()
-		if updateBlock == nil {
-			continue
-		}
-
-		blockMutex.Lock()
-		block.BlockNum = updateBlock.Slot
-		block.Slot = updateBlock.Slot
-		block.LastTime = updateBlock.BlockTime.Timestamp
-		block.Time = updateBlock.GetBlockTime().Timestamp
-		block.PrevBlockHash = solana.MustHashFromBase58(updateBlock.GetBlockhash())
-		currentBlock.Store(updateBlock.Slot)
-		blockMutex.Unlock()
-
-	}
-}
-
-func WSOLSubscribeWithRelay(conn *grpc.ClientConn) {
-
-	bal, _ := GetTokenBalance(
-		solana.MustPublicKeyFromBase58(config.C.Bot.Player),
-		solana.MustPublicKeyFromBase58("So11111111111111111111111111111111111111112"),
-	)
-	if bal == nil || bal.Uint64() == 0 {
-		SolATA_Balance.Store(big.NewInt(0))
-		SolATA.Store(false)
-	} else {
-		SolATA_Balance.Store(big.NewInt(int64(bal.Uint64())))
-		SolATA.Store(true)
-	}
-
-	balF := GetBalanceByPublic(config.C.Bot.Player)
-	logx.Infof("获取 SOL 余额成功: %v \n", balF)
-	if bal != nil {
-		balU, _ := balF.Uint64()
-		Sol_Balance.Store(balU)
-	}
-
-	subscribe := make(chan interface{})
-	var subscription pb.SubscribeRequest
-	commitment := pb.CommitmentLevel_PROCESSED
-	subscription.Commitment = &commitment
-	subscription.Accounts = make(map[string]*pb.SubscribeRequestFilterAccounts)
-	subscription.Accounts["account_sub"] = &pb.SubscribeRequestFilterAccounts{}
-	subscription.Accounts["account_sub"].Account = []string{"1"}
-	go stream.Grpc_subscribe(conn, &subscription, context.Background(), subscribe)
-
-	for msg := range subscribe {
-		update, ok := msg.(*pb.SubscribeUpdate)
-		if !ok {
-			log.Printf("收到非预期类型消息: %T \n", msg)
-			continue
-		}
-
-		accountSub := update.GetAccount()
-		if accountSub == nil || accountSub.Account == nil {
-			continue
-		}
-
-		accountData := accountSub.GetAccount().Data
-		wsolToken, err := utils.TokenAccountFromData(accountData)
-		if err != nil {
-			log.Printf("解析 TokenAccount 数据失败: %v \n", err)
-			continue
-		}
-
-		amount := int64(wsolToken.Amount)
-		if amount > 0 {
-			SolATA_Balance.Store(big.NewInt(amount)) // 可优化复用
-			SolATA.Store(true)
-		} else {
-			SolATA_Balance.Store(big.NewInt(0))
-			SolATA.Store(false)
-		}
-
-		go func() {
-			bal := GetBalanceByPublic(config.C.Bot.Player)
-			logx.Infof("获取 SOL 余额成功: %v \n", bal)
-			if bal != nil {
-				balU, _ := bal.Uint64()
-				Sol_Balance.Store(balU)
-			}
-		}()
-
-	}
-}
-
 func BlockSubscribe() {
 	rpcClient, wsClient := GetWSRPCForRequest()
 	sub, err := wsClient.SlotSubscribe()
@@ -215,13 +74,11 @@ func BlockSubscribe() {
 
 	time.Sleep(1 * time.Second)
 	fmt.Println("Attempting to reconnect block sub")
-	go BlockSubscribe()
 }
 
 func UpdateBlock(rpcClient *rpc.Client, slot uint64) {
 	updateMutex.Lock()
 	defer updateMutex.Unlock()
-	clock := Clock{}
 	ctx, exp := context.WithTimeout(context.Background(), 1*time.Second)
 	defer exp()
 	if currentBlock.Load() < slot {
@@ -251,18 +108,20 @@ func UpdateBlock(rpcClient *rpc.Client, slot uint64) {
 			return
 		}
 
-		blockMutex.Lock()
-		block.BlockNum = slot
-		block.Slot = slot
-		block.LastTime = clock.UnixTimestamp
-		block.Time = clock.UnixTimestamp
-		block.PrevBlockHash = recent.Value.Blockhash
-		currentBlock.Store(slot)
-		blockMutex.Unlock()
+		UpdateBlockData(slot, recent.Value.Blockhash)
 
 		// BlockChan <- []byte(fmt.Sprintf("%d", slot))
 		// fmt.Printf("Updated block hash,slot:%d \n", slot)
 	}
+}
+
+func UpdateBlockData(slot uint64, prevBlockHash solana.Hash) {
+	blockMutex.Lock()
+	block.BlockNum = slot
+	block.Slot = slot
+	block.PrevBlockHash = prevBlockHash
+	currentBlock.Store(slot)
+	blockMutex.Unlock()
 }
 
 func GetBlockHash() solana.Hash {
@@ -275,27 +134,6 @@ func GetSlot() uint64 {
 	blockMutex.RLock()
 	defer blockMutex.RUnlock()
 	return block.Slot
-}
-
-func UpdateGasWithRelay() {
-	subscribe := make(chan interface{})
-	go stream.Fee_subscribe(context.Background(), subscribe)
-
-	for msg := range subscribe {
-		got := msg.(*feepb.TransactionFeeStreamResponse)
-		// spew.Dump(got)
-		fee := got.GetPriorityFee()
-		tip := got.GetTip()
-		tipUint := uint64(tip.Value * 1e99)
-		if fee == nil {
-			continue
-		}
-		gasAPIMap.mu.Lock()
-		gasAPIMap.Medium = uint64(fee.Value)
-		gasAPIMap.High = tipUint
-		gasAPIMap.mu.Unlock()
-
-	}
 }
 
 func updateGas() {
@@ -363,6 +201,15 @@ func updateGas() {
 			}
 		}
 	}
+}
+
+func UpdateGasData(low, medium, high, veryHigh uint64) {
+	gasAPIMap.mu.Lock()
+	gasAPIMap.Low = low
+	gasAPIMap.Medium = medium
+	gasAPIMap.High = high
+	gasAPIMap.VeryHigh = veryHigh
+	gasAPIMap.mu.Unlock()
 }
 
 func GetLow() uint64 {

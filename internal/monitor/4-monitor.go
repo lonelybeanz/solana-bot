@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"solana-bot/internal/client"
@@ -32,7 +33,6 @@ var (
 		"smart": true,
 		"scm":   false,
 	}
-
 	BuyCache *fifomap.FIFOMap
 )
 
@@ -82,14 +82,16 @@ func NewPumpFunMonitor() (*PumpFunMonitor, error) {
 		// rpcs.NewTempgoralChannel(),
 	}
 
-	grpcClient := stream.Grpc_connect(stream.GRPCUrl[0], true)
+	grpcClient := streams[0].Conns[0]
 	if grpcClient == nil {
 		return nil, err
 	}
-	go global.BlockSubscribeWithRelay(grpcClient)
-	go global.NonceSubscribeWithRelay(grpcClient)
-	go global.WSOLSubscribeWithRelay(grpcClient)
-	go global.UpdateGasWithRelay()
+	go stream.BlockSubscribeWithRelay(grpcClient)
+	go stream.NonceSubscribeWithRelay(grpcClient)
+	go stream.WSOLSubscribeWithRelay(grpcClient)
+	go stream.UpdateGasWithRelay()
+
+	HTTPUrls := strings.Split(os.Getenv("BLZ_HTTP_URLS"), ",")
 
 	ctx, cancel := context.WithCancel(context.Background())
 	return &PumpFunMonitor{
@@ -99,7 +101,7 @@ func NewPumpFunMonitor() (*PumpFunMonitor, error) {
 			cancel:        cancel,
 			rpcs:          rpcs,
 			streams:       streams,
-			httpClient:    rpc.New(rpc.MainNetBeta.RPC),
+			httpClient:    rpc.New(HTTPUrls[0]),
 			wallet:        wallet,
 			lastBuyTime:   atomic_.NewMap(), // 初始化 Map
 			pubsub:        pubsub.NewPubSub(),
