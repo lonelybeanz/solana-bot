@@ -3,7 +3,7 @@
 ## Stream
 
 流来源于BlockRazor；可以自建节点，或者购买dedicate Node，或者购买其他Grpc渠道的交易推送流；
-参考https://blockrazor.gitbook.io/blockrazor/solana/shred-stream
+#### 参考https://blockrazor.gitbook.io/blockrazor/solana/shred-stream；可以试用
 
 ## 发单服务
 推荐https://www.blockrazor.io/
