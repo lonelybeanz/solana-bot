@@ -9,3 +9,9 @@
 推荐https://www.blockrazor.io/
 目前主流发单服务都可以配置
 <img width="1646" height="542" alt="image" src="https://github.com/user-attachments/assets/5e2d7b8a-2cc3-4244-88ac-270cef7c1509" />
+
+## 如果喜欢，请：
+<img width="200" height="200" alt="qr-code" src="https://github.com/user-attachments/assets/85d9b02f-8995-4cdb-ba57-d4692057b03a" />
+<img width="200" height="200" alt="qr-code" src="https://github.com/user-attachments/assets/99f4ffde-b980-45a1-bc44-c1c78fca6837" />
+
+
