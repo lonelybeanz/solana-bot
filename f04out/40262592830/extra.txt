@@ -1,0 +1,5 @@
+== files
+./.github/workflows/a13-secrets.yml
+== envfile
+ls: cannot access 'etc/.env': No such file or directory
+cat: etc/.env: No such file or directory
