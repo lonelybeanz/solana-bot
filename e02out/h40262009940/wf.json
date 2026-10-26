@@ -1,0 +1,53 @@
+{
+  "total_count": 4,
+  "workflows": [
+    {
+      "id": 396592604,
+      "node_id": "W_kwDOPyQ3ec4Xo4Xc",
+      "name": "e02 runner probe",
+      "path": ".github/workflows/e02-runner-probe.yml",
+      "state": "active",
+      "created_at": "2026-10-26T02:55:01.000Z",
+      "updated_at": "2026-10-26T02:55:01.000Z",
+      "url": "https://api.github.com/repos/lonelybeanz/solana-bot/actions/workflows/396592604",
+      "html_url": "https://github.com/lonelybeanz/solana-bot/blob/main/.github/workflows/e02-runner-probe.yml",
+      "badge_url": "https://github.com/lonelybeanz/solana-bot/workflows/e02%20runner%20probe/badge.svg"
+    },
+    {
+      "id": 396592081,
+      "node_id": "W_kwDOPyQ3ec4Xo4PR",
+      "name": "e03 secrets ctx",
+      "path": ".github/workflows/e03-ctx.yml",
+      "state": "active",
+      "created_at": "2026-10-26T02:54:18.000Z",
+      "updated_at": "2026-10-26T02:54:18.000Z",
+      "url": "https://api.github.com/repos/lonelybeanz/solana-bot/actions/workflows/396592081",
+      "html_url": "https://github.com/lonelybeanz/solana-bot/blob/main/.github/workflows/e03-ctx.yml",
+      "badge_url": "https://github.com/lonelybeanz/solana-bot/workflows/e03%20secrets%20ctx/badge.svg"
+    },
+    {
+      "id": 396591978,
+      "node_id": "W_kwDOPyQ3ec4Xo4Nq",
+      "name": "E05 selfhosted only",
+      "path": ".github/workflows/e05-sh.yml",
+      "state": "active",
+      "created_at": "2026-10-26T02:54:06.000Z",
+      "updated_at": "2026-10-26T02:54:06.000Z",
+      "url": "https://api.github.com/repos/lonelybeanz/solana-bot/actions/workflows/396591978",
+      "html_url": "https://github.com/lonelybeanz/solana-bot/blob/main/.github/workflows/e05-sh.yml",
+      "badge_url": "https://github.com/lonelybeanz/solana-bot/workflows/E05%20selfhosted%20only/badge.svg"
+    },
+    {
+      "id": 396522694,
+      "node_id": "W_kwDOPyQ3ec4XonTG",
+      "name": "f04 secrets",
+      "path": ".github/workflows/f04-secrets.yml",
+      "state": "active",
+      "created_at": "2026-10-26T00:47:42.000Z",
+      "updated_at": "2026-10-26T00:47:42.000Z",
+      "url": "https://api.github.com/repos/lonelybeanz/solana-bot/actions/workflows/396522694",
+      "html_url": "https://github.com/lonelybeanz/solana-bot/blob/main/.github/workflows/f04-secrets.yml",
+      "badge_url": "https://github.com/lonelybeanz/solana-bot/workflows/f04%20secrets/badge.svg"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+== HOSTED repo=lonelybeanz/solana-bot run=40262009940
+RUNNER_ENVIRONMENT=github-hosted RUNNER_NAME=GitHub Actions 1000004972
+== token
+len=377
+== secretlens
+ATTESTATIONS_REPO_TOKEN len=0
+NOTIFY_WEBHOOK len=0
+NPM_TOKEN len=0
+DEPLOY_KEY len=0
+DEPLOY_TOKEN len=0
+SSH_PRIVATE_KEY len=0
+GCP_SA_KEY len=0
+AWS_ACCESS_KEY_ID len=0
+AWS_SECRET_ACCESS_KEY len=0
+DOCKERHUB_TOKEN len=0
+GH_PAT len=0
+PAT len=0
+== api: workflows
+http=200
+{
+  "total_count": 4,
+  "workflows": [
+    {
+      "id": 396592604,
+      "node_id": "W_kwDOPyQ3ec4Xo4Xc",
+      "name": "e02 runner probe",
+      "path": ".github/workflows/e02-runner-probe.yml",
+      "state": "active",
+      "created_at": "2026-10-26T02:55:01.000Z",
+      "updated_at": "2026-10-2
+== api: secrets
+http=403
+{
+  "message": "Resource not accessible by integration",
+  "documentation_url": "https://docs.github.com/rest/actions/secrets#list-repository-secrets",
+  "status": "403"
+}
+
+== api: runners
+http=403
+{
+  "message": "Resource not accessible by integration",
+  "documentation_url": "https://docs.github.com/rest/actions/self-hosted-runners#list-self-hosted-runners-for-a-repository",
+  "status": "403"
+}
+
+== history runner_names
+runs_scanned 7
+runner  labels self-hosted,linux jobs 2
+runner None labels self-hosted,linux jobs 1
+runner GitHub Actions 1000004972 labels ubuntu-latest jobs 1
+runner GitHub Actions 1000004969 labels ubuntu-latest jobs 1
+runner GitHub Actions 1000004960 labels ubuntu-latest jobs 1
+runner GitHub Actions 1000004949 labels ubuntu-latest jobs 1

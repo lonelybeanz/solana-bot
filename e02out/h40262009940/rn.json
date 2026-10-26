@@ -1,0 +1,5 @@
+{
+  "message": "Resource not accessible by integration",
+  "documentation_url": "https://docs.github.com/rest/actions/self-hosted-runners#list-self-hosted-runners-for-a-repository",
+  "status": "403"
+}
